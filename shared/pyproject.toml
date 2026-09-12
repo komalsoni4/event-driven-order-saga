@@ -1,0 +1,19 @@
+[project]
+name = "saga-shared"
+version = "0.1.0"
+description = "Shared event schemas, RabbitMQ helpers, and Mongo/idempotency helpers for the order-processing saga services"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "motor>=3.4",
+    "aio-pika>=9.4",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["saga_shared*"]
