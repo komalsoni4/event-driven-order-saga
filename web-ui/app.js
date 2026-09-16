@@ -1,7 +1,7 @@
 const services = {
-  order: 'http://localhost:8001',
-  inventory: 'http://localhost:8002',
-  payment: 'http://localhost:8003'
+  order: window.SAGA_CONFIG?.orderServiceUrl || 'http://localhost:8001',
+  inventory: window.SAGA_CONFIG?.inventoryServiceUrl || 'http://localhost:8002',
+  payment: window.SAGA_CONFIG?.paymentServiceUrl || 'http://localhost:8003'
 };
 const apiKey = () => document.querySelector('#api-key').value.trim();
 const adminHeaders = () => ({ 'X-Admin-API-Key': apiKey() });

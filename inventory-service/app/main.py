@@ -67,7 +67,7 @@ app = FastAPI(title="inventory-service", lifespan=lifespan)
 app.state.admin_api_key = settings.admin_api_key
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080"],
+    allow_origins=settings.allowed_origins,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "X-Admin-API-Key", "X-Correlation-ID"],
 )

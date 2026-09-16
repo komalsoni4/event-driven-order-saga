@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: order-saga-order
+    runtime: docker
+    plan: free
+    dockerfilePath: ./order-service/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars: &backend-env
+      - key: MONGO_CONNECTION_URL
+        sync: false
+      - key: RABBITMQ_CONNECTION_URL
+        sync: false
+      - key: ADMIN_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: MAX_RETRIES
+        value: "3"
+      - key: RETRY_BASE_DELAY_MS
+        value: "5000"
+      - key: PAYMENT_FAIL_THRESHOLD_CENTS
+        value: "100000"
+
+  - type: web
+    name: order-saga-inventory
+    runtime: docker
+    plan: free
+    dockerfilePath: ./inventory-service/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars: *backend-env
+
+  - type: web
+    name: order-saga-payment
+    runtime: docker
+    plan: free
+    dockerfilePath: ./payment-service/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars: *backend-env
+
+  - type: web
+    name: order-saga-ui
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./web-ui
+    envVars:
+      - key: ORDER_SERVICE_URL
+        sync: false
+      - key: INVENTORY_SERVICE_URL
+        sync: false
+      - key: PAYMENT_SERVICE_URL
+        sync: false

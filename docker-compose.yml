@@ -42,6 +42,9 @@ services:
       RETRY_BASE_DELAY_MS: ${RETRY_BASE_DELAY_MS:-5000}
       PAYMENT_FAIL_THRESHOLD_CENTS: ${PAYMENT_FAIL_THRESHOLD_CENTS:-100000}
       ADMIN_API_KEY: ${ADMIN_API_KEY:-local-admin-key}
+      MONGO_CONNECTION_URL: ${MONGO_CONNECTION_URL:-}
+      RABBITMQ_CONNECTION_URL: ${RABBITMQ_CONNECTION_URL:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -68,6 +71,9 @@ services:
       MAX_RETRIES: ${MAX_RETRIES:-3}
       RETRY_BASE_DELAY_MS: ${RETRY_BASE_DELAY_MS:-5000}
       ADMIN_API_KEY: ${ADMIN_API_KEY:-local-admin-key}
+      MONGO_CONNECTION_URL: ${MONGO_CONNECTION_URL:-}
+      RABBITMQ_CONNECTION_URL: ${RABBITMQ_CONNECTION_URL:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -95,6 +101,9 @@ services:
       RETRY_BASE_DELAY_MS: ${RETRY_BASE_DELAY_MS:-5000}
       PAYMENT_FAIL_THRESHOLD_CENTS: ${PAYMENT_FAIL_THRESHOLD_CENTS:-100000}
       ADMIN_API_KEY: ${ADMIN_API_KEY:-local-admin-key}
+      MONGO_CONNECTION_URL: ${MONGO_CONNECTION_URL:-}
+      RABBITMQ_CONNECTION_URL: ${RABBITMQ_CONNECTION_URL:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -112,6 +121,10 @@ services:
       context: ./web-ui
     ports:
       - "${WEB_UI_PORT:-8080}:80"
+    environment:
+      ORDER_SERVICE_URL: ${ORDER_SERVICE_URL:-http://localhost:8001}
+      INVENTORY_SERVICE_URL: ${INVENTORY_SERVICE_URL:-http://localhost:8002}
+      PAYMENT_SERVICE_URL: ${PAYMENT_SERVICE_URL:-http://localhost:8003}
     depends_on:
       order-service:
         condition: service_healthy

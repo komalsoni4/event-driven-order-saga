@@ -1,0 +1,5 @@
+window.SAGA_CONFIG = {
+  orderServiceUrl: "${ORDER_SERVICE_URL}",
+  inventoryServiceUrl: "${INVENTORY_SERVICE_URL}",
+  paymentServiceUrl: "${PAYMENT_SERVICE_URL}"
+};
