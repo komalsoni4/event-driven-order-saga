@@ -66,7 +66,10 @@ class StockRepository:
         if unavailable:
             for item in reserved:
                 await self._db[STOCK_COLLECTION].update_one(
-                    {"_id": item["sku"]},
+                    {
+                        "_id": item["sku"],
+                        "reserved_qty": {"$gte": item["qty"]},
+                    },
                     {"$inc": {"available_qty": item["qty"], "reserved_qty": -item["qty"]}},
                 )
             return False, unavailable
@@ -75,7 +78,10 @@ class StockRepository:
     async def release_items(self, items: list[dict]) -> None:
         for item in items:
             await self._db[STOCK_COLLECTION].update_one(
-                {"_id": item["sku"]},
+                {
+                    "_id": item["sku"],
+                    "reserved_qty": {"$gte": item["qty"]},
+                },
                 {
                     "$inc": {"available_qty": item["qty"], "reserved_qty": -item["qty"]},
                     "$set": {"updated_at": utcnow()},

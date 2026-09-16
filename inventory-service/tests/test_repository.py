@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 from app.repository import (
@@ -65,6 +67,23 @@ async def test_release_items_restores_availability(stock_repo):
     stock = {doc["_id"]: doc for doc in await stock_repo.list_stock()}
     assert stock["SKU-1"]["available_qty"] == 100
     assert stock["SKU-1"]["reserved_qty"] == 0
+
+
+@pytest.mark.asyncio
+async def test_concurrent_reservations_never_oversell_stock(stock_repo):
+    attempts = await asyncio.gather(
+        *[
+            stock_repo.reserve_items([{"sku": "SKU-5", "qty": 1}])
+            for _ in range(10)
+        ]
+    )
+
+    successful_reservations = [success for success, _ in attempts if success]
+    stock = {doc["_id"]: doc for doc in await stock_repo.list_stock()}
+
+    assert len(successful_reservations) == 2
+    assert stock["SKU-5"]["available_qty"] == 0
+    assert stock["SKU-5"]["reserved_qty"] == 2
 
 
 @pytest.mark.asyncio
