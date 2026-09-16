@@ -6,7 +6,12 @@ from fastapi import FastAPI
 from saga_shared.config import SagaSettings
 from saga_shared.idempotency import ensure_idempotency_indexes
 from saga_shared.mongo import get_client, get_database
-from saga_shared.observability import CorrelationIdMiddleware, configure_logging
+from saga_shared.observability import (
+    CorrelationIdMiddleware,
+    MetricsMiddleware,
+    configure_logging,
+    metrics_response,
+)
 from saga_shared.rabbitmq import Publisher, connect
 
 from .api import router
@@ -55,4 +60,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="payment-service", lifespan=lifespan)
 app.add_middleware(CorrelationIdMiddleware)
+app.add_middleware(MetricsMiddleware, service_name="payment-service")
 app.include_router(router)
+app.add_api_route("/metrics", metrics_response, methods=["GET"])

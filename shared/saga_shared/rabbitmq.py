@@ -30,7 +30,15 @@ from aio_pika import ExchangeType, Message
 from aio_pika.abc import AbstractChannel, AbstractIncomingMessage, AbstractQueue
 
 from .events import EventEnvelope
-from .observability import reset_correlation_id, set_correlation_id
+from .observability import (
+    EVENTS_CONSUMED,
+    EVENTS_PARKED,
+    EVENTS_PUBLISHED,
+    EVENT_HANDLER_FAILURES,
+    EVENT_RETRIES,
+    reset_correlation_id,
+    set_correlation_id,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +85,7 @@ class Publisher:
             delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
         )
         await exchange.publish(message, routing_key=routing_key)
+        EVENTS_PUBLISHED.labels(event_type=envelope.event_type).inc()
         logger.info(
             "published event_id=%s event_type=%s routing_key=%s",
             envelope.event_id,
@@ -149,7 +158,11 @@ class ResilientConsumer:
             envelope = EventEnvelope.model_validate(payload)
             token = set_correlation_id(envelope.correlation_id)
             await self._handler(payload)
+            EVENTS_CONSUMED.labels(
+                queue=self._queue_name, event_type=envelope.event_type
+            ).inc()
         except Exception:
+            EVENT_HANDLER_FAILURES.labels(queue=self._queue_name).inc()
             logger.exception(
                 "handler failed queue=%s retry_count=%s", self._queue_name, retry_count
             )
@@ -157,10 +170,12 @@ class ResilientConsumer:
                 retry_count, self._max_retries, self._base_delay_ms
             )
             if decision == "retry":
+                EVENT_RETRIES.labels(queue=self._queue_name).inc()
                 await self._republish(
                     self.retry_queue_name, message, retry_count + 1, delay_ms
                 )
             else:
+                EVENTS_PARKED.labels(queue=self._queue_name).inc()
                 await self._republish(self.parked_queue_name, message, retry_count, None)
                 logger.error(
                     "parked message queue=%s after %s retries", self._queue_name, retry_count
