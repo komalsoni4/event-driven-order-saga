@@ -38,7 +38,10 @@ async def test_on_inventory_reserved_transitions_order(repo, handlers):
     raw = _raw(
         EventType.INVENTORY_RESERVED,
         InventoryReservedPayload(
-            order_id=order_id, reservation_id="res-1", items=[OrderItem(sku="SKU-1", qty=1)]
+            order_id=order_id,
+            reservation_id="res-1",
+            items=[OrderItem(sku="SKU-1", qty=1)],
+            amount_cents=1000,
         ),
     )
     await handlers.on_inventory_reserved(raw)
@@ -55,7 +58,10 @@ async def test_on_inventory_reserved_is_idempotent_on_redelivery(repo, handlers)
     raw = _raw(
         EventType.INVENTORY_RESERVED,
         InventoryReservedPayload(
-            order_id=order_id, reservation_id="res-1", items=[OrderItem(sku="SKU-1", qty=1)]
+            order_id=order_id,
+            reservation_id="res-1",
+            items=[OrderItem(sku="SKU-1", qty=1)],
+            amount_cents=1000,
         ),
     )
     await handlers.on_inventory_reserved(raw)

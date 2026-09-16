@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e shared
+          python -m pip install pytest==8.3.4 pytest-asyncio==0.25.2 mongomock-motor
+          python -m pip install -r order-service/requirements.txt
+          python -m pip install -r inventory-service/requirements.txt
+          python -m pip install -r payment-service/requirements.txt
+
+      - name: Run shared tests
+        run: python -m pytest shared/tests
+
+      - name: Run order service tests
+        run: python -m pytest order-service/tests
+
+      - name: Run inventory service tests
+        run: python -m pytest inventory-service/tests
+
+      - name: Run payment service tests
+        run: python -m pytest payment-service/tests
+
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build service images
+        run: docker compose build
+
+      - name: Start infrastructure
+        run: docker compose up -d rabbitmq mongo
+
+      - name: Start application services
+        run: docker compose up -d order-service inventory-service payment-service
+
+      - name: Wait for service health checks
+        run: |
+          for url in http://localhost:8001/health http://localhost:8002/health http://localhost:8003/health; do
+            for attempt in {1..60}; do
+              if curl --fail --silent "$url" > /dev/null; then
+                break
+              fi
+              if [ "$attempt" -eq 60 ]; then
+                echo "Service did not become healthy: $url"
+                docker compose ps
+                docker compose logs
+                exit 1
+              fi
+              sleep 2
+            done
+          done
+
+      - name: Install integration-test dependencies
+        run: python -m pip install -r integration-tests/requirements.txt
+
+      - name: Run integration tests
+        run: python -m pytest integration-tests
+
+      - name: Show service status on failure
+        if: failure()
+        run: docker compose ps && docker compose logs
+
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
