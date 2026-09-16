@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from saga_shared.config import SagaSettings
 from saga_shared.idempotency import ensure_idempotency_indexes
 from saga_shared.mongo import get_client, get_database
+from saga_shared.observability import CorrelationIdMiddleware, configure_logging
 from saga_shared.rabbitmq import Publisher, connect
 
 from .api import router
@@ -13,7 +14,7 @@ from .consumers import OrderConsumerHandlers, build_consumers
 from .publisher import OrderEventPublisher
 from .repository import OrderRepository
 
-logging.basicConfig(level=logging.INFO)
+configure_logging()
 logger = logging.getLogger("order-service")
 
 settings = SagaSettings()
@@ -49,4 +50,5 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="order-service", lifespan=lifespan)
+app.add_middleware(CorrelationIdMiddleware)
 app.include_router(router)

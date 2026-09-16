@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from saga_shared.config import SagaSettings
 from saga_shared.idempotency import ensure_idempotency_indexes
 from saga_shared.mongo import get_client, get_database
+from saga_shared.observability import CorrelationIdMiddleware, configure_logging
 from saga_shared.rabbitmq import Publisher, connect
 
 from .api import router
@@ -14,7 +15,7 @@ from .publisher import InventoryEventPublisher
 from .repository import ReservationRepository, StockRepository
 from .seed import SEED_STOCK
 
-logging.basicConfig(level=logging.INFO)
+configure_logging()
 logger = logging.getLogger("inventory-service")
 
 settings = SagaSettings()
@@ -57,4 +58,5 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="inventory-service", lifespan=lifespan)
+app.add_middleware(CorrelationIdMiddleware)
 app.include_router(router)

@@ -13,6 +13,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from .observability import get_correlation_id
+
 
 class EventType:
     ORDER_CREATED = "order.created"
@@ -33,13 +35,18 @@ def utcnow() -> datetime:
 
 class EventEnvelope(BaseModel):
     event_id: str = Field(default_factory=new_id)
+    correlation_id: str = Field(default_factory=lambda: get_correlation_id() or new_id())
     event_type: str
     occurred_at: datetime = Field(default_factory=utcnow)
     payload: dict[str, Any]
 
     @classmethod
     def create(cls, event_type: str, payload: BaseModel) -> "EventEnvelope":
-        return cls(event_type=event_type, payload=payload.model_dump(mode="json"))
+        return cls(
+            event_type=event_type,
+            correlation_id=get_correlation_id() or new_id(),
+            payload=payload.model_dump(mode="json"),
+        )
 
 
 class OrderItem(BaseModel):

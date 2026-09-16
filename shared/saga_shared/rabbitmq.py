@@ -30,6 +30,7 @@ from aio_pika import ExchangeType, Message
 from aio_pika.abc import AbstractChannel, AbstractIncomingMessage, AbstractQueue
 
 from .events import EventEnvelope
+from .observability import reset_correlation_id, set_correlation_id
 
 logger = logging.getLogger(__name__)
 
@@ -142,8 +143,11 @@ class ResilientConsumer:
 
     async def _on_message(self, message: AbstractIncomingMessage) -> None:
         retry_count = int((message.headers or {}).get(RETRY_COUNT_HEADER, 0))
+        token = None
         try:
             payload = json.loads(message.body)
+            envelope = EventEnvelope.model_validate(payload)
+            token = set_correlation_id(envelope.correlation_id)
             await self._handler(payload)
         except Exception:
             logger.exception(
@@ -161,6 +165,9 @@ class ResilientConsumer:
                 logger.error(
                     "parked message queue=%s after %s retries", self._queue_name, retry_count
                 )
+        finally:
+            if token is not None:
+                reset_correlation_id(token)
         await message.ack()
 
     async def start(self) -> AbstractQueue:
