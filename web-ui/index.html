@@ -10,61 +10,72 @@
   <main class="shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">EVENT-DRIVEN ORDER SAGA</p>
-        <h1>Control room</h1>
-        <p class="lede">Follow an order from reservation to payment without leaving the workflow.</p>
+        <p class="eyebrow">ORDER DEMO</p>
+        <h1>Order journey</h1>
+        <p class="lede">Try an order and watch what happens as stock is checked, payment is decided, and the order is completed or reversed.</p>
       </div>
       <div class="header-actions">
         <span id="last-refresh" class="muted">Waiting for refresh</span>
-        <button id="refresh" class="button button-light">Refresh data</button>
+        <button id="refresh" class="button button-light">Refresh</button>
       </div>
     </header>
 
     <section class="toolbar" aria-label="Dashboard controls">
-      <label class="key-field">Admin API key
-        <input id="api-key" type="password" value="local-admin-key" autocomplete="off">
-      </label>
-      <button id="reset-stock" class="button button-danger">Reset demo stock</button>
-      <span id="notice" class="notice" role="status"></span>
+      <details class="advanced-controls">
+        <summary>Advanced controls</summary>
+        <div class="advanced-body">
+          <label class="key-field">Admin access key
+            <input id="api-key" type="password" value="local-admin-key" autocomplete="off">
+          </label>
+          <button id="reset-stock" class="button button-danger">Reset demo data</button>
+        </div>
+      </details>
+      <span id="notice" class="notice" role="status">Ready to try an order</span>
     </section>
 
     <section class="service-strip" aria-label="Service health">
-      <article class="service"><span class="pulse"></span><span>Order service</span><strong id="order-health">checking</strong></article>
-      <article class="service"><span class="pulse"></span><span>Inventory service</span><strong id="inventory-health">checking</strong></article>
-      <article class="service"><span class="pulse"></span><span>Payment service</span><strong id="payment-health">checking</strong></article>
-      <a class="service-link" href="http://localhost:15672" target="_blank" rel="noreferrer">RabbitMQ console <span>↗</span></a>
+      <article class="service"><span class="pulse"></span><span>Order processing</span><strong id="order-health">checking</strong></article>
+      <article class="service"><span class="pulse"></span><span>Stock checking</span><strong id="inventory-health">checking</strong></article>
+      <article class="service"><span class="pulse"></span><span>Payment checking</span><strong id="payment-health">checking</strong></article>
+      <a class="service-link" href="http://localhost:15672" target="_blank" rel="noreferrer">Technical view <span>↗</span></a>
     </section>
 
     <section class="grid">
       <article class="panel order-panel">
-        <div class="panel-heading"><div><p class="eyebrow">COMMAND</p><h2>Create an order</h2></div><span class="panel-mark">01</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">TRY IT</p><h2>Place an order</h2><p class="panel-help">Choose a ready-made example, or fill in your own order.</p></div><span class="panel-mark">01</span></div>
+        <div class="scenarios" aria-label="Demo scenarios">
+          <button class="scenario active" data-scenario="success"><strong>Successful order</strong><small>Everything works</small></button>
+          <button class="scenario" data-scenario="payment"><strong>Payment declined</strong><small>Stock is returned</small></button>
+          <button class="scenario" data-scenario="stock"><strong>Not enough stock</strong><small>Payment is skipped</small></button>
+        </div>
         <form id="order-form">
-          <label>Customer ID<input id="customer-id" value="dashboard-user" required></label>
-          <div class="form-row"><label>SKU<input id="sku" value="SKU-1" required></label><label>Quantity<input id="quantity" type="number" min="1" value="1" required></label></div>
-          <label>Amount (cents)<input id="amount" type="number" min="1" value="1000" required></label>
-          <label class="check"><input id="force-failure" type="checkbox"> Force payment failure</label>
-          <button class="button button-primary" type="submit">Start order saga <span>→</span></button>
+          <label>Customer name<input id="customer-id" value="dashboard-user" placeholder="e.g. Alex" required></label>
+          <div class="form-row"><label>Product code<input id="sku" value="SKU-1" required></label><label>Quantity<input id="quantity" type="number" min="1" value="1" required></label></div>
+          <label>Order total (dollars)<input id="amount-dollars" type="number" min="1" step="0.01" value="10.00" required></label>
+          <input id="amount" type="hidden" value="1000">
+          <label class="check"><input id="force-failure" type="checkbox"> Simulate a declined payment</label>
+          <button class="button button-primary" type="submit">Place order <span>→</span></button>
         </form>
-        <div id="order-result" class="result empty">Submit an order to see its event history here.</div>
+        <div id="order-result" class="result empty">Your order’s progress will appear here.</div>
       </article>
 
       <article class="panel stock-panel">
-        <div class="panel-heading"><div><p class="eyebrow">INVENTORY</p><h2>Stock position</h2></div><span class="panel-mark">02</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">WHAT WE HAVE</p><h2>Available products</h2><p class="panel-help">Reserved units are temporarily held for orders in progress.</p></div><span class="panel-mark">02</span></div>
         <div id="stock-table" class="table-wrap"><p class="muted">Loading stock...</p></div>
       </article>
 
       <article class="panel wide-panel">
-        <div class="panel-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Orders</h2></div><span id="order-count" class="count">0</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">YOUR ACTIVITY</p><h2>Recent orders</h2><p class="panel-help">Each order shows the steps it has completed.</p></div><span id="order-count" class="count">0</span></div>
         <div id="orders-table" class="table-wrap"><p class="muted">Loading orders...</p></div>
       </article>
 
       <article class="panel wide-panel">
-        <div class="panel-heading"><div><p class="eyebrow">PAYMENTS</p><h2>Payment decisions</h2></div><span class="panel-mark">03</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">MONEY CHECK</p><h2>Payment results</h2><p class="panel-help">A declined payment automatically releases reserved stock.</p></div><span class="panel-mark">03</span></div>
         <div id="payments-table" class="table-wrap"><p class="muted">Loading payments...</p></div>
       </article>
     </section>
 
-    <footer><span>FastAPI · RabbitMQ · MongoDB</span><span>Local operations dashboard</span></footer>
+    <footer><span>Order journey demo</span><span>Refreshes automatically</span></footer>
   </main>
   <script src="app.js"></script>
 </body>
