@@ -40,6 +40,13 @@
       <a class="service-link" href="http://localhost:15672" target="_blank" rel="noreferrer">Technical view <span>↗</span></a>
     </section>
 
+    <section class="kpi-strip" aria-label="Order summary">
+      <article class="kpi"><span>Orders shown</span><strong id="kpi-total">0</strong><small>Latest 20 orders</small></article>
+      <article class="kpi kpi-good"><span>Completed</span><strong id="kpi-complete">0</strong><small>Payment accepted</small></article>
+      <article class="kpi kpi-warn"><span>Needs attention</span><strong id="kpi-failed">0</strong><small>Not completed</small></article>
+      <article class="kpi"><span>Units available</span><strong id="kpi-stock">0</strong><small>Across all products</small></article>
+    </section>
+
     <section class="grid">
       <article class="panel order-panel">
         <div class="panel-heading"><div><p class="eyebrow">TRY IT</p><h2>Place an order</h2><p class="panel-help">Choose a ready-made example, or fill in your own order.</p></div><span class="panel-mark">01</span></div>
@@ -65,8 +72,14 @@
       </article>
 
       <article class="panel wide-panel">
-        <div class="panel-heading"><div><p class="eyebrow">YOUR ACTIVITY</p><h2>Recent orders</h2><p class="panel-help">Each order shows the steps it has completed.</p></div><span id="order-count" class="count">0</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">YOUR ACTIVITY</p><h2>Recent orders</h2><p class="panel-help">Select an order to inspect its full journey.</p></div><span id="order-count" class="count">0</span></div>
+        <div class="table-tools"><label class="search-field">Search orders<input id="order-search" type="search" placeholder="Customer or order ID"></label><label class="filter-field">Show<select id="order-filter"><option value="ALL">All orders</option><option value="CONFIRMED">Completed</option><option value="FAILED">Not completed</option><option value="PENDING">In progress</option></select></label></div>
         <div id="orders-table" class="table-wrap"><p class="muted">Loading orders...</p></div>
+      </article>
+
+      <article id="order-detail" class="panel detail-panel wide-panel" aria-live="polite">
+        <div class="panel-heading"><div><p class="eyebrow">ORDER DETAILS</p><h2>Choose an order</h2><p class="panel-help">The journey and outcome will appear here.</p></div><span class="panel-mark">04</span></div>
+        <div class="detail-empty">Select a row above to see what happened step by step.</div>
       </article>
 
       <article class="panel wide-panel">
