@@ -16,6 +16,7 @@ class SagaSettings(BaseSettings):
     retry_base_delay_ms: int = 5000
 
     payment_fail_threshold_cents: int = 100_000
+    admin_api_key: str = "local-admin-key"
 
     @property
     def rabbitmq_url(self) -> str:

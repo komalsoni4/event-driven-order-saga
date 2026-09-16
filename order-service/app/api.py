@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
+
+from saga_shared.auth import require_admin_api_key
 
 from saga_shared.events import OrderCreatedPayload
 
@@ -62,7 +64,11 @@ async def get_order(order_id: str, req: Request):
     return _to_response(doc)
 
 
-@router.get("/admin/orders", response_model=list[OrderResponse])
+@router.get(
+    "/admin/orders",
+    response_model=list[OrderResponse],
+    dependencies=[Depends(require_admin_api_key)],
+)
 async def list_orders(req: Request, limit: int = 50):
     repo: OrderRepository = req.app.state.repo
     docs = await repo.list_orders(limit)

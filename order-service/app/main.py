@@ -55,6 +55,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="order-service", lifespan=lifespan)
+app.state.admin_api_key = settings.admin_api_key
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(MetricsMiddleware, service_name="order-service")
 app.include_router(router)

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
+
+from saga_shared.auth import require_admin_api_key
 
 from .models import StockView
 from .repository import StockRepository
@@ -12,7 +14,11 @@ async def health():
     return {"status": "ok"}
 
 
-@router.get("/admin/stock", response_model=list[StockView])
+@router.get(
+    "/admin/stock",
+    response_model=list[StockView],
+    dependencies=[Depends(require_admin_api_key)],
+)
 async def list_stock(req: Request):
     repo: StockRepository = req.app.state.stock_repo
     docs = await repo.list_stock()
@@ -22,7 +28,11 @@ async def list_stock(req: Request):
     ]
 
 
-@router.post("/admin/reset-stock", response_model=list[StockView])
+@router.post(
+    "/admin/reset-stock",
+    response_model=list[StockView],
+    dependencies=[Depends(require_admin_api_key)],
+)
 async def reset_stock(req: Request):
     """Wipes and re-seeds stock so a live demo can be repeated without
     restarting containers."""

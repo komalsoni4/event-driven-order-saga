@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
+
+from saga_shared.auth import require_admin_api_key
 
 router = APIRouter()
 
@@ -8,7 +10,7 @@ async def health():
     return {"status": "ok"}
 
 
-@router.get("/admin/payments")
+@router.get("/admin/payments", dependencies=[Depends(require_admin_api_key)])
 async def list_payments(req: Request, limit: int = 50):
     repo = req.app.state.payment_repo
     docs = await repo.list_payments(limit)

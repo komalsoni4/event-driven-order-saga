@@ -41,6 +41,7 @@ services:
       MAX_RETRIES: ${MAX_RETRIES:-3}
       RETRY_BASE_DELAY_MS: ${RETRY_BASE_DELAY_MS:-5000}
       PAYMENT_FAIL_THRESHOLD_CENTS: ${PAYMENT_FAIL_THRESHOLD_CENTS:-100000}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-local-admin-key}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -66,6 +67,7 @@ services:
       MONGO_HOST: mongo
       MAX_RETRIES: ${MAX_RETRIES:-3}
       RETRY_BASE_DELAY_MS: ${RETRY_BASE_DELAY_MS:-5000}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-local-admin-key}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -92,6 +94,7 @@ services:
       MAX_RETRIES: ${MAX_RETRIES:-3}
       RETRY_BASE_DELAY_MS: ${RETRY_BASE_DELAY_MS:-5000}
       PAYMENT_FAIL_THRESHOLD_CENTS: ${PAYMENT_FAIL_THRESHOLD_CENTS:-100000}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-local-admin-key}
     depends_on:
       rabbitmq:
         condition: service_healthy
