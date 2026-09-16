@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from saga_shared.config import SagaSettings
 from saga_shared.idempotency import ensure_idempotency_indexes
@@ -64,6 +65,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="inventory-service", lifespan=lifespan)
 app.state.admin_api_key = settings.admin_api_key
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-Admin-API-Key", "X-Correlation-ID"],
+)
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(MetricsMiddleware, service_name="inventory-service")
 app.include_router(router)

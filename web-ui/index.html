@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Saga Control Room</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">EVENT-DRIVEN ORDER SAGA</p>
+        <h1>Control room</h1>
+        <p class="lede">Follow an order from reservation to payment without leaving the workflow.</p>
+      </div>
+      <div class="header-actions">
+        <span id="last-refresh" class="muted">Waiting for refresh</span>
+        <button id="refresh" class="button button-light">Refresh data</button>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="Dashboard controls">
+      <label class="key-field">Admin API key
+        <input id="api-key" type="password" value="local-admin-key" autocomplete="off">
+      </label>
+      <button id="reset-stock" class="button button-danger">Reset demo stock</button>
+      <span id="notice" class="notice" role="status"></span>
+    </section>
+
+    <section class="service-strip" aria-label="Service health">
+      <article class="service"><span class="pulse"></span><span>Order service</span><strong id="order-health">checking</strong></article>
+      <article class="service"><span class="pulse"></span><span>Inventory service</span><strong id="inventory-health">checking</strong></article>
+      <article class="service"><span class="pulse"></span><span>Payment service</span><strong id="payment-health">checking</strong></article>
+      <a class="service-link" href="http://localhost:15672" target="_blank" rel="noreferrer">RabbitMQ console <span>↗</span></a>
+    </section>
+
+    <section class="grid">
+      <article class="panel order-panel">
+        <div class="panel-heading"><div><p class="eyebrow">COMMAND</p><h2>Create an order</h2></div><span class="panel-mark">01</span></div>
+        <form id="order-form">
+          <label>Customer ID<input id="customer-id" value="dashboard-user" required></label>
+          <div class="form-row"><label>SKU<input id="sku" value="SKU-1" required></label><label>Quantity<input id="quantity" type="number" min="1" value="1" required></label></div>
+          <label>Amount (cents)<input id="amount" type="number" min="1" value="1000" required></label>
+          <label class="check"><input id="force-failure" type="checkbox"> Force payment failure</label>
+          <button class="button button-primary" type="submit">Start order saga <span>→</span></button>
+        </form>
+        <div id="order-result" class="result empty">Submit an order to see its event history here.</div>
+      </article>
+
+      <article class="panel stock-panel">
+        <div class="panel-heading"><div><p class="eyebrow">INVENTORY</p><h2>Stock position</h2></div><span class="panel-mark">02</span></div>
+        <div id="stock-table" class="table-wrap"><p class="muted">Loading stock...</p></div>
+      </article>
+
+      <article class="panel wide-panel">
+        <div class="panel-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Orders</h2></div><span id="order-count" class="count">0</span></div>
+        <div id="orders-table" class="table-wrap"><p class="muted">Loading orders...</p></div>
+      </article>
+
+      <article class="panel wide-panel">
+        <div class="panel-heading"><div><p class="eyebrow">PAYMENTS</p><h2>Payment decisions</h2></div><span class="panel-mark">03</span></div>
+        <div id="payments-table" class="table-wrap"><p class="muted">Loading payments...</p></div>
+      </article>
+    </section>
+
+    <footer><span>FastAPI · RabbitMQ · MongoDB</span><span>Local operations dashboard</span></footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

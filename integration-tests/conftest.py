@@ -7,6 +7,7 @@ import pytest
 from helpers import INVENTORY_SERVICE_URL, ORDER_SERVICE_URL, PAYMENT_SERVICE_URL
 
 SERVICE_URLS = (ORDER_SERVICE_URL, INVENTORY_SERVICE_URL, PAYMENT_SERVICE_URL)
+ADMIN_HEADERS = {"X-Admin-API-Key": "local-admin-key"}
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -34,5 +35,7 @@ async def client():
 
 @pytest.fixture(autouse=True)
 async def reset_stock(client):
-    resp = await client.post(f"{INVENTORY_SERVICE_URL}/admin/reset-stock")
+    resp = await client.post(
+        f"{INVENTORY_SERVICE_URL}/admin/reset-stock", headers=ADMIN_HEADERS
+    )
     resp.raise_for_status()

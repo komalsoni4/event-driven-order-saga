@@ -107,6 +107,19 @@ services:
       retries: 5
       start_period: 10s
 
+  web-ui:
+    build:
+      context: ./web-ui
+    ports:
+      - "${WEB_UI_PORT:-8080}:80"
+    depends_on:
+      order-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+
 volumes:
   rabbitmq_data:
   mongo_data:
